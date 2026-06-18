@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Thryve Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#11141a;
+    --bg-soft:#161b23;
+    --card:#1d2330;
+    --card-hover:#232a3a;
+    --border:#2b3247;
+    --text:#f3eee3;
+    --text-dim:#9aa3b8;
+    --text-faint:#5c6478;
+    --accent:#d2a24c;
+    --accent-soft:rgba(210,162,76,0.14);
+    --accent-strong:#e8bd6e;
+    --danger:#e2685a;
+    --danger-soft:rgba(226,104,90,0.12);
+    --success:#7fb39a;
+    --success-soft:rgba(127,179,154,0.12);
+    --radius:14px;
+    --serif:'Fraunces', serif;
+    --sans:'Inter', system-ui, sans-serif;
+    --mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    background-image:
+      radial-gradient(circle at 12% -10%, rgba(210,162,76,0.10), transparent 45%),
+      radial-gradient(circle at 100% 10%, rgba(127,179,154,0.06), transparent 40%);
+    background-attachment:fixed;
+  }
+  #app{max-width:720px;margin:0 auto;padding:0 20px 80px;min-height:100vh;display:flex;flex-direction:column;}
+
+  /* ---------- Header / brand ---------- */
+  .brandbar{display:flex;align-items:center;gap:14px;padding:28px 0 20px;}
+  .brandbar img{width:40px;height:40px;border-radius:50%;flex-shrink:0;}
+  .brandbar .word{display:flex;flex-direction:column;line-height:1.1;}
+  .brandbar .word b{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:.01em;}
+  .brandbar .word span{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint);margin-top:2px;}
+
+  /* ---------- Generic screen / card ---------- */
+  .screen{flex:1;display:flex;flex-direction:column;justify-content:center;animation:fadeUp .45s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .centerpane{display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;padding:40px 0;}
+  .ring{width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--border);background:var(--card);position:relative;}
+  .ring::before{content:'';position:absolute;inset:-8px;border-radius:50%;border:1px solid var(--accent-soft);}
+  .spinner{width:26px;height:26px;border-radius:50%;border:2.5px solid var(--border);border-top-color:var(--accent);animation:spin 0.9s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  h1.title{font-family:var(--serif);font-weight:600;font-size:26px;margin:0;}
+  p.lede{color:var(--text-dim);font-size:15px;line-height:1.6;max-width:440px;margin:0;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);}
+
+  /* ---------- buttons / inputs ---------- */
+  .btn{
+    appearance:none;border:none;cursor:pointer;
+    font-family:var(--sans);font-weight:600;font-size:15px;
+    padding:14px 26px;border-radius:999px;
+    transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .btn-primary{background:linear-gradient(135deg,var(--accent-strong),var(--accent));color:#1a1305;box-shadow:0 8px 20px -8px rgba(210,162,76,0.55);}
+  .btn-primary:hover{transform:translateY(-1px);}
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
+  .btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--border);}
+  .btn-ghost:hover{color:var(--text);border-color:var(--text-faint);}
+  .btn-row{display:flex;gap:12px;justify-content:space-between;margin-top:28px;}
+
+  label.field{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;text-align:left;}
+  label.field span.lbl{font-size:13px;color:var(--text-dim);font-weight:500;}
+  label.field span.lbl em{color:var(--accent);font-style:normal;}
+  input[type=text],input[type=email],input[type=tel],select{
+    background:var(--card);border:1px solid var(--border);color:var(--text);
+    border-radius:10px;padding:13px 14px;font-size:15px;font-family:var(--sans);
+    outline:none;transition:border-color .15s ease, background .15s ease;
+  }
+  input::placeholder{color:var(--text-faint);}
+  input:focus,select:focus{border-color:var(--accent);background:var(--card-hover);}
+  input.error,select.error{border-color:var(--danger);}
+  select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0L5 6L10 0' fill='none' stroke='%239aa3b8' stroke-width='1.4'/></svg>");background-repeat:no-repeat;background-position:right 14px center;}
+
+  .formcard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 26px;margin-top:8px;}
+
+  /* ---------- Progress trail ---------- */
+  .trail-wrap{padding:18px 0 6px;}
+  .trail{display:flex;align-items:center;gap:3px;}
+  .trail .node{flex:1;height:4px;border-radius:3px;background:var(--border);position:relative;overflow:hidden;}
+  .trail .node.done{background:var(--accent);}
+  .trail .node.current{background:linear-gradient(90deg,var(--accent),var(--border));}
+  .progress-meta{display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;}
+  .progress-meta .stage{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);}
+  .progress-meta .pct{font-family:var(--mono);font-size:11px;color:var(--accent);}
+
+  /* ---------- Section header ---------- */
+  .section-head{padding:22px 0 6px;position:relative;}
+  .section-head .sec-no{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);}
+  .section-head h2{font-family:var(--serif);font-weight:600;font-size:24px;margin:6px 0 8px;}
+  .section-head .sub{color:var(--text-dim);font-size:13.5px;}
+  .section-head .instructions{margin-top:10px;font-size:13.5px;color:var(--text-dim);background:var(--accent-soft);border-left:2px solid var(--accent);padding:10px 14px;border-radius:0 8px 8px 0;}
+  .sunburst{position:absolute;right:-10px;top:6px;width:64px;height:64px;opacity:.18;pointer-events:none;}
+
+  /* ---------- Question blocks ---------- */
+  .qblock{margin-top:18px;padding:20px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);transition:border-color .2s ease;}
+  .qblock.unanswered-flag{border-color:var(--danger);}
+  .qblock .qhead{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px;}
+  .qblock .qnum{font-family:var(--mono);font-size:12px;color:var(--accent);flex-shrink:0;padding-top:2px;min-width:26px;}
+  .qblock .qtext{font-size:15.5px;line-height:1.5;}
+  .qblock .qhint{font-size:11.5px;color:var(--text-faint);margin-top:3px;}
+
+  .opt{display:flex;align-items:flex-start;gap:11px;padding:11px 13px;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;cursor:pointer;transition:background .15s ease,border-color .15s ease;background:var(--bg-soft);}
+  .opt:hover{border-color:var(--text-faint);}
+  .opt.selected{border-color:var(--accent);background:var(--accent-soft);}
+  .opt .mark{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--text-faint);display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .opt.checkbox .mark{border-radius:6px;}
+  .opt.selected .mark{border-color:var(--accent);background:var(--accent);}
+  .opt .mark .dot{width:8px;height:8px;border-radius:50%;background:#1a1305;opacity:0;}
+  .opt.checkbox .mark .dot{width:10px;height:10px;border-radius:2px;}
+  .opt.selected .mark .dot{opacity:1;}
+  .opt .otext{font-size:14.5px;line-height:1.45;}
+  .opt .oletter{font-family:var(--mono);color:var(--text-faint);font-size:12px;margin-right:6px;}
+
+  .wat-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px dashed var(--border);}
+  .wat-row:last-child{border-bottom:none;}
+  .wat-row .wat-word{font-family:var(--serif);font-size:17px;min-width:120px;flex-shrink:0;}
+  .wat-row input{flex:1;}
+  .wat-group-label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);margin:18px 0 4px;}
+  .wat-group-label:first-child{margin-top:4px;}
+
+  /* ---------- Toast ---------- */
+  #toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:#21283a;border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:999px;font-size:13.5px;box-shadow:0 12px 30px -10px rgba(0,0,0,0.6);opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;z-index:50;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ---------- misc states ---------- */
+  .badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;}
+  .badge.denied{background:var(--danger-soft);color:var(--danger);}
+  .badge.ok{background:var(--success-soft);color:var(--success);}
+  footer.foot{padding:30px 0 10px;text-align:center;color:var(--text-faint);font-size:12px;}
+
+  @media (max-width:480px){
+    .wat-row{flex-direction:column;align-items:flex-start;gap:6px;}
+    .wat-row .wat-word{min-width:0;}
+    .wat-row input{width:100%;}
+    h1.title{font-size:22px;}
+    .section-head h2{font-size:20px;}
+  }
+</style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="toast"></div>
+
+<script>
+/* =========================================================================
+   CONFIG — paste your deployed Apps Script Web App URL between the quotes.
+   ========================================================================= */
+const CONFIG = {
+  SCRIPT_URL: "PASTE_YOUR_DEPLOYED_WEB_APP_URL_HERE",
+  JSONP_TIMEOUT_MS: 20000
+};
+
+const LOGO_SRC = "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAH0AfQDASIAAhEBAxEB/8QAHQABAAAHAQEAAAAAAAAAAAAAAAIDBAUGBwgBCf/EAE4QAAEDAwIEAwQFCAUKBQUBAAEAAgMEBREGIQcSMUETUWEIIjJxFEJSgZEVIzM0YqGx4XJ0kpPBFhckJzU3Q4LC0VZjZHOyGCVEU1VF/8QAGgEBAAMBAQEAAAAAAAAAAAAAAAECAwQFBv/EACcRAQEBAAICAgMBAQEAAgMAAAABAgMRITESUQQTQSIUMkJxI1Jh/9oADAMBAAIRAxEAPwDstERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQFJkqoY3lricj0U5Wqt/WXKLehXfS4PtH8E+lw+Z/BW0dF63oo7ouP0uD7R/BRxzRyHDSfwVq7qroT+c+5T3RXIiKQREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQERCQASegQEJAGScK01V4a0lsEZcR3Oyt76uoqD+ckOPIdFHaLV8nroI9g7mPkFRTXCZ+QzDAqFgUxoUdo7Xujl8WBrj17qcrbapOV5jPQ9FclMTBERSkREQFaq39ZcrqrVW/rDlXSKljoogMBQAjCiJGEiTAVTQfpj8lTEhVNB+m+5SK9ERSCIiAiIgk1chji26noqeOre3Zw5gvK1/NLgbgKRv5KO0LjHURv6HB8ipqtQGyjZNJH8JyPIp2drkipoqtriGvaQSqlSkREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERBjt1p/BrHED3X7hU8YV7vMPiU/iAbs3Vkz5KFKnsUxqkxuUzmUWCdE8se147FXpjg5gcO4VhB2VztkvPEWE7tSLRWIiKyRERAVqrf1hyuqtdb+suUUSB0XpO/VMbLzGe6gek+qqbcQZz8lSOGBlTrUf8ASSPREdrsiIrJEREBQyO5WFyiVNWPxhii3qClcCTk9SvMFRnBPVQlZyqoUQIVbvtKfRs55eY9GquUqkZyRDPU7lTVaJgiIpBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQeSND2Fp6EYWL1LDDM+M7YOyylWa/wYc2YDrsUV19rY1xypzDsqcDdVEYyFFVTATjoqigl8OoBPQ7FSMbIBg5HZVW9MhRSaOTxadru/QqcrrCIiArVW/rLldVaq3H0lyi3oqV2RBuFE4bKnaEDscqmWr9aPyUo+SnWof6W75KYj+rsiIrrCIiATgElWuaTnlc5VldJ4cBHc7K2AqukVNB3UQPVSmuXufVUQnNAK9ij55Q0DbO6ltdt1VZQt90vPfopzPKVSNhhERaJEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBEUuomZBGXvPyHmg9nlZCwuefl6qihrXeKS/4D+5UU0755C93TsPJeFwAVLVe19aQ4Ag5BXqtFHWGF3K/4D+5XZjg5oc05BVpe1nqIikEREBSK+ET0z2H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";
+
+/* =========================================================================
+   QUEST DATA — full questionnaire transcribed from THRYVE_QUEST_v2.docx
+   ========================================================================= */
+const QUEST_DATA = [
+  {
+    "id": "s1a",
+    "section_no": "Section 1 – Part A",
+    "title": "Personality Deep Dive",
+    "subtitle": "Scenario Responses",
+    "instructions": "Read each situation carefully and select the option that best matches what you would most likely do in real life, even if it is not the “perfect” answer.",
+    "type": "single",
+    "letters": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "questions": [
+      {
+        "q": "You are working on a group project where a few team members are not taking the task seriously, and the submission deadline is getting closer. What are you most likely to do in this situation?",
+        "options": [
+          "Take charge of the situation, assign clear roles, and ensure the work gets completed",
+          "Try to motivate the group and make the task more interesting for everyone",
+          "Focus on completing your own part properly and avoid getting involved in conflict",
+          "Try to understand everyone’s strengths and reorganize the work accordingly"
+        ]
+      },
+      {
+        "q": "You suddenly have a full day with no schoolwork, tuition, or responsibilities planned. How do you usually prefer to spend such a day?",
+        "options": [
+          "Plan out the day in advance and follow a structured routine",
+          "Try something new or spontaneous that you have not done before",
+          "Spend time alone relaxing, thinking, or doing something quiet",
+          "Connect with friends or family and spend time socializing"
+        ]
+      },
+      {
+        "q": "You are trying to solve a difficult question or problem that you cannot understand immediately. What is your natural first reaction?",
+        "options": [
+          "Break the problem into smaller steps and try to solve it systematically",
+          "Ask a teacher, friend, or someone experienced for help",
+          "Try different methods quickly to see what works",
+          "Leave it for some time and come back to it later with a fresh mind"
+        ]
+      },
+      {
+        "q": "A close friend of yours is feeling upset but is not clearly expressing what is wrong. How do you usually respond in such a situation?",
+        "options": [
+          "Offer practical suggestions that might help solve their problem",
+          "Sit with them patiently and listen without interrupting",
+          "Share a similar experience from your own life to help them relate",
+          "Encourage them to speak to someone who can guide them better"
+        ]
+      },
+      {
+        "q": "During a team competition or group activity, which kind of role do you naturally find yourself taking up most often?",
+        "options": [
+          "Leading the team and planning how things should be done",
+          "Keeping everyone motivated and maintaining positive energy",
+          "Suggesting creative ideas and new approaches",
+          "Making sure everyone is coordinated and things run smoothly"
+        ]
+      },
+      {
+        "q": "You have multiple assignments and tasks to complete within a limited time. How do you usually handle such situations?",
+        "options": [
+          "Create a clear plan or timetable and follow it strictly",
+          "Start with the most urgent tasks first",
+          "Begin with the tasks that interest or excite you the most",
+          "Try to share responsibilities or balance tasks wherever possible"
+        ]
+      },
+      {
+        "q": "Your teacher suddenly asks you to present a topic in front of the class without prior preparation. What are you most likely to do?",
+        "options": [
+          "Quickly organize your thoughts and deliver the content confidently",
+          "Try to interact with classmates to make yourself feel more comfortable",
+          "Present the topic in a creative or engaging way",
+          "Stay calm and speak step by step without rushing"
+        ]
+      },
+      {
+        "q": "You are given an opportunity to participate in an activity that is outside your comfort zone and something you have never tried before. How do you usually react?",
+        "options": [
+          "Accept it as a challenge and give it a try",
+          "Think carefully about the pros and cons before deciding",
+          "Prefer to avoid it and stick to what you are comfortable with",
+          "Ask someone you trust before making a decision"
+        ]
+      },
+      {
+        "q": "You notice someone in your class being treated unfairly by others. What are you most likely to do in that situation?",
+        "options": [
+          "Speak up immediately and stand against the unfair behaviour",
+          "Support the person privately and make them feel better",
+          "Inform a teacher or authority figure about the situation",
+          "Stay neutral to avoid getting involved in conflict"
+        ]
+      },
+      {
+        "q": "When you think about what drives you to work hard or stay focused, what motivates you the most?",
+        "options": [
+          "Achieving goals and completing tasks successfully",
+          "Getting appreciation or recognition from others",
+          "Learning something new and improving yourself",
+          "Helping or supporting people around you"
+        ]
+      },
+      {
+        "q": "When you make a mistake or fail at something important, how do you usually respond?",
+        "options": [
+          "Try to correct the mistake immediately and improve",
+          "Talk to someone and share how you feel about it",
+          "Reflect on what went wrong and learn from it",
+          "Take some time before reacting or deciding what to do"
+        ]
+      },
+      {
+        "q": "During group discussions in class, how do you usually behave?",
+        "options": [
+          "Take the lead and guide the direction of the discussion",
+          "Encourage others to participate and share their thoughts",
+          "Contribute ideas and suggestions when needed",
+          "Ensure that everyone gets a chance and things stay balanced"
+        ]
+      },
+      {
+        "q": "You had planned something important, but suddenly things change due to unexpected reasons. How do you usually handle such situations?",
+        "options": [
+          "Quickly adjust your plan and create a new one",
+          "Stay positive and adapt to the situation",
+          "Feel uncomfortable initially before adjusting",
+          "Take some time to understand and then adapt"
+        ]
+      },
+      {
+        "q": "You are given responsibility for organizing an event or activity in school. What do you focus on first?",
+        "options": [
+          "Setting clear goals and planning everything step by step",
+          "Involving people and building excitement around the event",
+          "Thinking of creative ideas to make the event unique",
+          "Ensuring that everything runs smoothly and without confusion"
+        ]
+      },
+      {
+        "q": "When you start learning something completely new, how do you usually approach it?",
+        "options": [
+          "Follow a structured method or step-by-step approach",
+          "Learn along with others or through discussion",
+          "Experiment freely and learn by trying different things",
+          "Observe carefully before starting"
+        ]
+      },
+      {
+        "q": "You are under pressure due to exams, expectations, or deadlines. How do you usually respond?",
+        "options": [
+          "Focus more seriously and push yourself to perform",
+          "Seek support or encouragement from others",
+          "Take breaks or distract yourself for relief",
+          "Stay calm and handle things steadily"
+        ]
+      },
+      {
+        "q": "When you strongly disagree with someone’s opinion, what do you usually do?",
+        "options": [
+          "Clearly explain your point of view with logic",
+          "Try to understand their perspective as well",
+          "Stick to your opinion without changing it",
+          "Avoid argument to maintain peace"
+        ]
+      },
+      {
+        "q": "You are given a leadership role in a school activity or project. How do you usually begin?",
+        "options": [
+          "Set clear goals and define what needs to be done",
+          "Build team energy and bring everyone together",
+          "Encourage ideas and suggestions from everyone",
+          "Ensure balance and coordination within the group"
+        ]
+      },
+      {
+        "q": "You come across an opportunity that could help you grow or learn something new. What do you usually do?",
+        "options": [
+          "Plan carefully and take action",
+          "Discuss it with others before deciding",
+          "Act quickly without overthinking",
+          "Observe and think before deciding"
+        ]
+      },
+      {
+        "q": "When you think about your future, which of the following best describes your current mindset?",
+        "options": [
+          "I prefer having a clear plan and direction",
+          "I enjoy exploring different possibilities",
+          "I have many ideas but no fixed path yet",
+          "I am still figuring things out gradually"
+        ]
+      },
+      {
+        "q": "You are given responsibility for a task that affects not only you but others as well. What matters most to you in that situation?",
+        "options": [
+          "Completing the task correctly and efficiently",
+          "Making sure everyone involved feels comfortable",
+          "Bringing in new ideas or improvements",
+          "Keeping everything balanced and smooth"
+        ]
+      },
+      {
+        "q": "When you are working on something important, what tends to distract you the most?",
+        "options": [
+          "Lack of proper planning or structure",
+          "Social interactions or conversations",
+          "Boredom or lack of interest",
+          "Overthinking or worrying too much"
+        ]
+      },
+      {
+        "q": "You need to prepare for something important, but you are not feeling motivated at all. What do you usually do?",
+        "options": [
+          "Push yourself with discipline and start anyway",
+          "Seek motivation or encouragement from others",
+          "Do something interesting first to build momentum",
+          "Wait until you feel mentally ready"
+        ]
+      },
+      {
+        "q": "When you look at your progress in life, how do you usually evaluate yourself?",
+        "options": [
+          "Based on how many goals I have achieved",
+          "Based on what others say about my performance",
+          "Based on what I have learned and improved",
+          "Based on how satisfied I feel internally"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "s1b",
+    "section_no": "Section 1 – Part B",
+    "title": "Word Association Test",
+    "subtitle": "15 Words",
+    "instructions": "Write the first word or thought that comes to your mind.",
+    "type": "text",
+    "questions": [
+      {
+        "q": "Chocolate",
+        "group": "Food & Sensory"
+      },
+      {
+        "q": "Pizza",
+        "group": "Food & Sensory"
+      },
+      {
+        "q": "Bitter",
+        "group": "Food & Sensory"
+      },
+      {
+        "q": "Game",
+        "group": "Fun & Play"
+      },
+      {
+        "q": "Winning",
+        "group": "Fun & Play"
+      },
+      {
+        "q": "Losing",
+        "group": "Fun & Play"
+      },
+      {
+        "q": "Alone",
+        "group": "Emotional Triggers"
+      },
+      {
+        "q": "Crowd",
+        "group": "Emotional Triggers"
+      },
+      {
+        "q": "Surprise",
+        "group": "Emotional Triggers"
+      },
+      {
+        "q": "Secret",
+        "group": "Emotional Triggers"
+      },
+      {
+        "q": "School",
+        "group": "Everyday Life"
+      },
+      {
+        "q": "Teacher",
+        "group": "Everyday Life"
+      },
+      {
+        "q": "Holiday",
+        "group": "Everyday Life"
+      },
+      {
+        "q": "Rule",
+        "group": "Subtle Indicators"
+      },
+      {
+        "q": "Risk",
+        "group": "Subtle Indicators"
+      }
+    ]
+  },
+  {
+    "id": "s5",
+    "section_no": "Section 5",
+    "title": "Subject Strengths & Preferences",
+    "subtitle": "",
+    "instructions": "For each question, select up to 2 options that best reflect what you would genuinely enjoy or prefer.",
+    "type": "multi",
+    "letters": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+    ],
+    "questions": [
+      {
+        "q": "If your school gave you the opportunity to design a completely new subject for one month, which type of subject would you be most interested in creating?",
+        "options": [
+          "A subject that explores how things work, including science, space, technology, or the human body",
+          "A subject that helps understand people, society, behaviour, and real-life issues",
+          "A subject that focuses on creative expression such as music, art, storytelling, or performance",
+          "A subject that teaches how ideas can grow into businesses or successful ventures",
+          "A subject that focuses on helping people and solving real-life problems"
+        ]
+      },
+      {
+        "q": "If you were given a two-week project where you could choose your topic freely, which type of project would you most likely select?",
+        "options": [
+          "A project where you build, experiment, or test how something works",
+          "A project where you research a topic deeply and present your findings",
+          "A project where you design or create something visually or artistically",
+          "A project where you plan or create something that can grow or generate value",
+          "A project where you organize or contribute to an activity that benefits others"
+        ]
+      },
+      {
+        "q": "When you spend time watching videos or exploring content online, which type of content do you naturally find most interesting?",
+        "options": [
+          "Content that explains scientific ideas, experiments, or how systems work",
+          "Content that explores human behaviour, real-life stories, or society",
+          "Content that focuses on creativity such as music, reels, or storytelling",
+          "Content that discusses business ideas, money, or growth strategies",
+          "Content that highlights social impact or helping people"
+        ]
+      },
+      {
+        "q": "If you had an entire day dedicated to learning something new without any pressure of marks or exams, what would you most likely choose to explore?",
+        "options": [
+          "Understanding systems, machines, scientific ideas, or the human body",
+          "Learning about people, history, behaviour, or social systems",
+          "Practicing a creative skill such as drawing, writing, or performing",
+          "Learning how to build, manage, or grow something valuable",
+          "Engaging in activities where you directly interact with and help people"
+        ]
+      },
+      {
+        "q": "Which type of school assignment do you usually find most enjoyable and engaging?",
+        "options": [
+          "Assignments that involve solving problems or finding logical answers",
+          "Assignments that involve writing, explaining, or analysing ideas",
+          "Assignments that allow you to create or design something new",
+          "Assignments that involve planning, organizing, or making decisions",
+          "Assignments that involve working with people or contributing in groups"
+        ]
+      },
+      {
+        "q": "If your school organized a field trip and you could choose the destination, which type of place would you be most excited to visit?",
+        "options": [
+          "A science lab, research center, or innovation hub",
+          "A museum, historical site, or place of learning about society",
+          "A creative studio related to art, music, or performance",
+          "A business environment such as a company or startup",
+          "A place where people work to support communities or social causes"
+        ]
+      },
+      {
+        "q": "When you are deeply engaged in thinking about something, what type of thinking do you enjoy the most?",
+        "options": [
+          "Logical thinking where you analyse and solve problems",
+          "Thinking that helps you understand different perspectives and ideas",
+          "Creative thinking where you imagine or design something new",
+          "Strategic thinking where you plan and make decisions",
+          "Thinking about people, emotions, and relationships"
+        ]
+      },
+      {
+        "q": "If someone gave you ₹1000 and asked you to use it creatively, what would you most likely choose to do?",
+        "options": [
+          "Use it to experiment or build something new",
+          "Use it to learn something meaningful",
+          "Use it to create something artistic or expressive",
+          "Use it to grow it into more value or money",
+          "Use it to help someone or contribute to a cause"
+        ]
+      },
+      {
+        "q": "Which type of challenge do you naturally find the most interesting and exciting?",
+        "options": [
+          "Challenges that involve solving complex or technical problems",
+          "Challenges that involve understanding people or situations",
+          "Challenges that involve creativity and original thinking",
+          "Challenges that involve decisions, growth, or outcomes",
+          "Challenges that involve helping or supporting others"
+        ]
+      },
+      {
+        "q": "When your friends approach you for help, what do they most commonly seek from you?",
+        "options": [
+          "Help with solving problems or understanding concepts",
+          "Advice or opinions about situations",
+          "Creative ideas or suggestions",
+          "Help in planning or making decisions",
+          "Emotional support or understanding"
+        ]
+      },
+      {
+        "q": "Which of the following activities would you be willing to spend extra time on, even without being asked?",
+        "options": [
+          "Exploring, experimenting, or discovering new things",
+          "Reading, writing, or discussing ideas",
+          "Creating, performing, or expressing yourself",
+          "Planning, building, or organizing something",
+          "Helping, guiding, or supporting others"
+        ]
+      },
+      {
+        "q": "If marks and exams were not a factor at all, which type of subjects would you still choose to learn?",
+        "options": [
+          "Subjects that help you understand how things work",
+          "Subjects that help you understand people and society",
+          "Subjects that allow you to create and express ideas",
+          "Subjects that teach growth, success, and decision-making",
+          "Subjects that help you solve real-life problems for people"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "s6",
+    "section_no": "Section 6",
+    "title": "Career Exploration & Aspirations",
+    "subtitle": "",
+    "instructions": "For each question, select up to 2 options that best reflect your natural preference.",
+    "type": "multi",
+    "letters": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+    ],
+    "questions": [
+      {
+        "q": "If you had the opportunity to spend a week observing and experiencing a real-world work environment, which type of place would you choose?",
+        "options": [
+          "A place where new systems, ideas, or technologies are developed",
+          "A place where people are taught, guided, or influenced",
+          "A place where creative work such as content, design, or media is produced",
+          "A place where decisions are made and growth is driven",
+          "A place where people are supported or helped directly"
+        ]
+      },
+      {
+        "q": "When you imagine yourself about 10 years from now, which type of work excites you the most?",
+        "options": [
+          "Work that involves solving complex or technical problems",
+          "Work that involves communication, teaching, or influencing people",
+          "Work that allows you to create something unique or expressive",
+          "Work that involves building, leading, or managing something",
+          "Work that involves helping people improve their lives"
+        ]
+      },
+      {
+        "q": "Which type of success would feel most meaningful to you personally?",
+        "options": [
+          "Becoming highly skilled or knowledgeable in a field",
+          "Being respected for your ideas or influence",
+          "Creating something original or memorable",
+          "Achieving financial success and independence",
+          "Making a meaningful difference in people’s lives"
+        ]
+      },
+      {
+        "q": "Which type of long-term path do you feel naturally drawn toward?",
+        "options": [
+          "Becoming an expert in a specific area",
+          "Working closely with people and ideas",
+          "Expressing yourself creatively",
+          "Building something of your own",
+          "Contributing to society or improving lives"
+        ]
+      },
+      {
+        "q": "What type of problems would you most enjoy solving in your future?",
+        "options": [
+          "Technical or scientific challenges",
+          "Social or behavioural challenges",
+          "Creative or design challenges",
+          "Business or growth challenges",
+          "Emotional or personal challenges"
+        ]
+      },
+      {
+        "q": "If you were to start something independently in the future, what would you most likely create?",
+        "options": [
+          "A system, tool, or solution",
+          "A platform to share knowledge or ideas",
+          "A creative brand or content channel",
+          "A business or venture",
+          "A social or impact-driven initiative"
+        ]
+      },
+      {
+        "q": "Which type of work environment do you think you would enjoy the most in the long run?",
+        "options": [
+          "A structured environment focused on solving problems",
+          "An interactive environment involving people and discussions",
+          "A flexible environment that allows creativity",
+          "A fast-paced environment focused on results and growth",
+          "A supportive environment focused on helping others"
+        ]
+      },
+      {
+        "q": "When you think about your future, which concern feels most important to you?",
+        "options": [
+          "Not being skilled or capable enough",
+          "Not being respected or valued",
+          "Not being able to express creativity",
+          "Not achieving financial stability",
+          "Not making a meaningful impact"
+        ]
+      },
+      {
+        "q": "Which of the following areas would you genuinely like to explore more deeply?",
+        "options": [
+          "Systems, science, or complex ideas",
+          "People, behaviour, or communication",
+          "Creative expression or media",
+          "Growth, money, or decision-making",
+          "Helping, guiding, or supporting others"
+        ]
+      },
+      {
+        "q": "If you had a mentor guiding you in life, what would you most want from them?",
+        "options": [
+          "Deep knowledge and expertise",
+          "Understanding and guidance",
+          "Creative inspiration",
+          "Practical advice for success",
+          "Personal and emotional support"
+        ]
+      },
+      {
+        "q": "What type of recognition would make you feel most satisfied?",
+        "options": [
+          "Being known for expertise",
+          "Being respected by people",
+          "Being appreciated for creativity",
+          "Being successful and influential",
+          "Being valued for helping others"
+        ]
+      },
+      {
+        "q": "If you could achieve one major thing in your life, what would matter most to you?",
+        "options": [
+          "Building something meaningful",
+          "Influencing or guiding people",
+          "Creating something memorable",
+          "Achieving success and independence",
+          "Improving people’s lives"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "s7",
+    "section_no": "Section 7",
+    "title": "Influence & Decision Ecosystem",
+    "subtitle": "",
+    "instructions": "Select up to 2 options for each question.",
+    "type": "multi",
+    "letters": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+    ],
+    "questions": [
+      {
+        "q": "When you are confused about an important academic or life decision, who do you naturally turn to first for guidance?",
+        "options": [
+          "Parents or family members",
+          "Teachers or mentors",
+          "Friends or peers",
+          "I prefer to decide on my own",
+          "Online sources or public figures"
+        ]
+      },
+      {
+        "q": "When someone close to you strongly suggests a career or path, how do you usually respond internally?",
+        "options": [
+          "I feel influenced and tend to consider it seriously",
+          "I listen carefully but think before deciding",
+          "I feel confused between my choice and theirs",
+          "I prefer to follow my own thinking",
+          "I get motivated to explore it independently"
+        ]
+      },
+      {
+        "q": "When you think about your future, whose opinion matters the most to you?",
+        "options": [
+          "My family’s expectations",
+          "My teachers’ or mentors’ advice",
+          "My friends’ or peer group’s views",
+          "My own thoughts and goals",
+          "Influencers, leaders, or people I admire"
+        ]
+      },
+      {
+        "q": "If your personal interest is very different from what your family expects, what are you most likely to do?",
+        "options": [
+          "Try to adjust to their expectations",
+          "Discuss and find a middle path",
+          "Feel confused and unsure",
+          "Follow my own interest strongly",
+          "Delay the decision"
+        ]
+      },
+      {
+        "q": "Who has had the biggest impact on the way you think about success?",
+        "options": [
+          "Family upbringing",
+          "Teachers or school environment",
+          "Friends and social circle",
+          "Personal experiences",
+          "Public figures or media"
+        ]
+      },
+      {
+        "q": "When you achieve something important, whose recognition matters most to you?",
+        "options": [
+          "Family",
+          "Teachers",
+          "Friends",
+          "My own satisfaction",
+          "Wider recognition"
+        ]
+      },
+      {
+        "q": "When you fail or face difficulty, who influences how you react the most?",
+        "options": [
+          "Family support or reaction",
+          "Teacher or mentor guidance",
+          "Friends’ opinions",
+          "My own mindset",
+          "External motivation (videos, content, etc.)"
+        ]
+      },
+      {
+        "q": "How do people around you usually influence your decisions?",
+        "options": [
+          "They guide and shape my choices strongly",
+          "They give suggestions but I decide",
+          "They sometimes confuse me",
+          "They have little influence on me",
+          "They inspire me to think differently"
+        ]
+      },
+      {
+        "q": "When making an important choice, what matters most in your decision?",
+        "options": [
+          "What my family expects",
+          "What seems practical and safe",
+          "What others are doing",
+          "What I truly want",
+          "What inspires me"
+        ]
+      },
+      {
+        "q": "How do your surroundings affect your confidence in your goals?",
+        "options": [
+          "They strongly increase or decrease it",
+          "They influence it to some extent",
+          "They sometimes confuse me",
+          "I am mostly self-driven",
+          "I get influenced by external success stories"
+        ]
+      },
+      {
+        "q": "When you think about your long-term goals, where do they mainly come from?",
+        "options": [
+          "Family values and expectations",
+          "School and academic exposure",
+          "Peer influence",
+          "Personal reflection",
+          "External inspiration"
+        ]
+      },
+      {
+        "q": "Which statement best describes how you take decisions?",
+        "options": [
+          "I mostly depend on guidance from others",
+          "I balance others’ advice with my thinking",
+          "I often feel unsure while deciding",
+          "I take independent decisions",
+          "I get inspired and then act"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "s8",
+    "section_no": "Section 8",
+    "title": "Family Resource & Opportunity Environment",
+    "subtitle": "",
+    "instructions": "Select up to 2 options for each question.",
+    "type": "multi",
+    "letters": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+    ],
+    "questions": [
+      {
+        "q": "How would you describe your family’s approach toward your career choices?",
+        "options": [
+          "They guide and expect certain paths",
+          "They support but allow flexibility",
+          "They are unsure themselves",
+          "They give me full freedom",
+          "They encourage exploration"
+        ]
+      },
+      {
+        "q": "When you want to try something new, how does your family usually respond?",
+        "options": [
+          "They prefer safe and known options",
+          "They ask questions before allowing",
+          "They sometimes discourage",
+          "They allow me to try freely",
+          "They actively support and encourage"
+        ]
+      },
+      {
+        "q": "How comfortable are you discussing your goals openly with your family?",
+        "options": [
+          "Very comfortable",
+          "Somewhat comfortable",
+          "Depends on the topic",
+          "Not very comfortable",
+          "I prefer not discussing"
+        ]
+      },
+      {
+        "q": "What type of support do you receive most from your family?",
+        "options": [
+          "Guidance and direction",
+          "Emotional encouragement",
+          "Financial support",
+          "Freedom to explore",
+          "Motivation and inspiration"
+        ]
+      },
+      {
+        "q": "How much freedom do you feel in choosing your future path?",
+        "options": [
+          "Very limited",
+          "Somewhat limited",
+          "Balanced",
+          "Mostly free",
+          "Completely independent"
+        ]
+      },
+      {
+        "q": "How often do you get opportunities to explore your interests outside academics?",
+        "options": [
+          "Rarely",
+          "Sometimes",
+          "Occasionally",
+          "Frequently",
+          "Actively encouraged"
+        ]
+      },
+      {
+        "q": "How does your family react when your interests are different from traditional paths?",
+        "options": [
+          "They discourage",
+          "They question",
+          "They are neutral",
+          "They accept",
+          "They support strongly"
+        ]
+      },
+      {
+        "q": "What kind of exposure do you have to different career options?",
+        "options": [
+          "Very limited",
+          "Basic awareness",
+          "Moderate exposure",
+          "Good exposure",
+          "Wide and diverse exposure"
+        ]
+      },
+      {
+        "q": "How does your environment affect your confidence in pursuing goals?",
+        "options": [
+          "It restricts me",
+          "It limits me sometimes",
+          "It is neutral",
+          "It supports me",
+          "It strongly encourages me"
+        ]
+      },
+      {
+        "q": "If you needed resources (courses, tools, guidance), how accessible are they to you?",
+        "options": [
+          "Very difficult",
+          "Limited",
+          "Moderate",
+          "Easily available",
+          "Highly accessible"
+        ]
+      },
+      {
+        "q": "How does your family view success?",
+        "options": [
+          "Stability and security",
+          "Respect and reputation",
+          "Balanced life",
+          "Achievement and growth",
+          "Impact and purpose"
+        ]
+      },
+      {
+        "q": "If you wanted to pursue an unconventional path, how likely is your family to support you?",
+        "options": [
+          "Very unlikely",
+          "Unlikely",
+          "Unsure",
+          "Likely",
+          "Very supportive"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "s9",
+    "section_no": "Section 9",
+    "title": "Study Habits & Learning",
+    "subtitle": "",
+    "instructions": "Select the one option that best describes what you usually do.",
+    "type": "single",
+    "letters": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+    ],
+    "questions": [
+      {
+        "q": "When you are preparing for an exam that is still a few days away, what is your most natural approach?",
+        "options": [
+          "I plan my study schedule in advance and follow it",
+          "I keep checking my understanding as I study",
+          "I focus on practicing questions or applying concepts",
+          "I start seriously only when the exam is close",
+          "I study without a fixed method"
+        ]
+      },
+      {
+        "q": "When you encounter a new topic that seems difficult, what do you usually do first?",
+        "options": [
+          "Break it into smaller parts to understand step by step",
+          "Try to check whether I really understand it",
+          "Practice examples to learn it",
+          "Leave it for later when I feel more prepared",
+          "Move ahead even if it is not fully clear"
+        ]
+      },
+      {
+        "q": "If you do not understand something in class, what is your most likely response?",
+        "options": [
+          "Try to figure it out on my own",
+          "Ask questions to clarify",
+          "Practice similar questions",
+          "Ignore it for now",
+          "Feel confused but do nothing immediately"
+        ]
+      },
+      {
+        "q": "While studying at home, what affects your focus the most?",
+        "options": [
+          "Not having a clear plan",
+          "Losing track of what I understand",
+          "Not having enough practice",
+          "Getting distracted easily",
+          "Feeling mentally overwhelmed"
+        ]
+      },
+      {
+        "q": "How do you usually track your progress while studying?",
+        "options": [
+          "By following a plan or checklist",
+          "By testing my understanding",
+          "By practicing regularly",
+          "By checking deadlines",
+          "I do not track clearly"
+        ]
+      },
+      {
+        "q": "When you receive feedback on a test, what do you usually do?",
+        "options": [
+          "Analyse mistakes",
+          "Reflect on what I understood",
+          "Practice more",
+          "Move on quickly",
+          "Ignore it"
+        ]
+      },
+      {
+        "q": "When studying for long hours, what helps you the most?",
+        "options": [
+          "Having a structured plan",
+          "Checking progress regularly",
+          "Practicing actively",
+          "Taking breaks frequently",
+          "Avoiding long sessions"
+        ]
+      },
+      {
+        "q": "When starting a big assignment, what is your usual first step?",
+        "options": [
+          "Plan and divide it",
+          "Think about how I will approach it",
+          "Start working on parts directly",
+          "Delay starting",
+          "Wait until required"
+        ]
+      },
+      {
+        "q": "When you feel unmotivated to study, what do you usually do?",
+        "options": [
+          "Start anyway with discipline",
+          "Remind myself of goals",
+          "Do something easier first",
+          "Take a long break",
+          "Avoid studying"
+        ]
+      },
+      {
+        "q": "How do you revise before exams?",
+        "options": [
+          "Follow a structured revision plan",
+          "Focus on understanding concepts",
+          "Practice questions",
+          "Quickly read notes",
+          "Do minimal revision"
+        ]
+      },
+      {
+        "q": "When trying to improve in a subject, what do you focus on most?",
+        "options": [
+          "Planning better",
+          "Understanding deeper",
+          "Practicing more",
+          "Studying when needed",
+          "Completing tasks"
+        ]
+      },
+      {
+        "q": "Which statement best describes your study style?",
+        "options": [
+          "Structured and organized",
+          "Reflective and understanding-focused",
+          "Practice-oriented",
+          "Inconsistent",
+          "Unstructured"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "s10",
+    "section_no": "Section 10",
+    "title": "Stress Management",
+    "subtitle": "",
+    "instructions": "Select the one option that best describes your usual response.",
+    "type": "single",
+    "letters": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+    ],
+    "questions": [
+      {
+        "q": "When you have multiple deadlines approaching, what is your most natural response?",
+        "options": [
+          "Break tasks into smaller steps and begin",
+          "Talk to someone or seek help",
+          "Try to stay calm and manage",
+          "Delay tasks due to pressure",
+          "Feel overwhelmed"
+        ]
+      },
+      {
+        "q": "When you feel stressed due to studies, what do you usually do?",
+        "options": [
+          "Try to solve the problem",
+          "Share with someone",
+          "Relax or take a break",
+          "Distract myself",
+          "Avoid it"
+        ]
+      },
+      {
+        "q": "When plans suddenly change, how do you respond?",
+        "options": [
+          "Adjust quickly",
+          "Seek support",
+          "Adapt gradually",
+          "Feel frustrated",
+          "Avoid the situation"
+        ]
+      },
+      {
+        "q": "When you feel pressure to perform, what do you do?",
+        "options": [
+          "Push myself to focus",
+          "Look for encouragement",
+          "Manage my emotions",
+          "Lose motivation",
+          "Avoid the task"
+        ]
+      },
+      {
+        "q": "How do you handle failure?",
+        "options": [
+          "Learn and try again",
+          "Discuss it",
+          "Take time to recover",
+          "Feel discouraged",
+          "Ignore it"
+        ]
+      },
+      {
+        "q": "When you feel low, what do you do?",
+        "options": [
+          "Take small action steps",
+          "Seek support",
+          "Take rest",
+          "Wait for motivation",
+          "Avoid responsibilities"
+        ]
+      },
+      {
+        "q": "Under pressure, how does your thinking change?",
+        "options": [
+          "Stay focused",
+          "Try to manage",
+          "Get distracted",
+          "Struggle to think",
+          "Feel stuck"
+        ]
+      },
+      {
+        "q": "After stress, how do you regain focus?",
+        "options": [
+          "Plan next steps",
+          "Talk to someone",
+          "Rest",
+          "Do something enjoyable",
+          "Wait"
+        ]
+      },
+      {
+        "q": "When making an important decision, what do you do?",
+        "options": [
+          "Think carefully",
+          "Take advice",
+          "Feel unsure",
+          "Delay",
+          "Avoid"
+        ]
+      },
+      {
+        "q": "How do you deal with expectations?",
+        "options": [
+          "Use them as motivation",
+          "Balance them",
+          "Feel pressure",
+          "Feel confused",
+          "Ignore them"
+        ]
+      },
+      {
+        "q": "When emotionally disturbed, what do you do?",
+        "options": [
+          "Reflect",
+          "Share",
+          "Distract",
+          "Keep it inside",
+          "Avoid"
+        ]
+      },
+      {
+        "q": "How do you handle stress overall?",
+        "options": [
+          "Very effectively",
+          "Manageable",
+          "Moderate",
+          "Difficult",
+          "Very difficult"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "s11",
+    "section_no": "Section 11",
+    "title": "Future-Ready Skills, Hobbies & Digital Expression",
+    "subtitle": "",
+    "instructions": "For each question, select the one option that best reflects what you would most likely choose or do.",
+    "type": "single",
+    "letters": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+    ],
+    "questions": [
+      {
+        "q": "If you could spend your entire weekend learning something new without any pressure of school, what would you most likely choose?",
+        "options": [
+          "Learning how technology works (coding, apps, or digital tools)",
+          "Learning something about people, languages, or communication",
+          "Practicing a creative skill like music, art, or storytelling",
+          "Exploring business ideas or ways to earn money",
+          "Participating in sports or physical activities"
+        ]
+      },
+      {
+        "q": "Your school is organizing a talent showcase event, and you are asked to choose a role. Which role excites you the most?",
+        "options": [
+          "Managing the event and organizing everything",
+          "Speaking, presenting, or interacting with the audience",
+          "Designing posters, visuals, or creative elements",
+          "Planning sponsorships or managing resources",
+          "Performing or participating actively"
+        ]
+      },
+      {
+        "q": "Imagine you are given a short internship opportunity during your holidays. What kind of work would you most prefer?",
+        "options": [
+          "Working with technology, systems, or innovation",
+          "Working with people in education or community activities",
+          "Creating content such as videos, posts, or campaigns",
+          "Understanding how businesses or money management works",
+          "Engaging in active or field-based tasks"
+        ]
+      },
+      {
+        "q": "After school, when you have some free time, what do you most naturally find yourself doing?",
+        "options": [
+          "Exploring how things work or trying something new",
+          "Reading, watching, or learning something interesting",
+          "Creating or expressing ideas (art, reels, writing, etc.)",
+          "Thinking about ideas, plans, or future possibilities",
+          "Playing games or engaging in physical activities"
+        ]
+      },
+      {
+        "q": "If you had to master one skill over the next year, which one would you most likely choose?",
+        "options": [
+          "Building or understanding technology",
+          "Communication, speaking, or influencing",
+          "Creative expression (writing, music, design, etc.)",
+          "Business thinking and decision-making",
+          "Physical or performance-based skills"
+        ]
+      },
+      {
+        "q": "If you were to start a personal project, what would you most likely work on?",
+        "options": [
+          "Creating something using technology (app, website, etc.)",
+          "Organizing an event or leading a group activity",
+          "Creating content (blog, video, or creative project)",
+          "Starting a small idea that could grow or earn",
+          "Building something related to fitness or activity"
+        ]
+      },
+      {
+        "q": "When you try to learn something new on your own, how do you usually begin?",
+        "options": [
+          "Exploring tools and trying things independently",
+          "Following structured videos or tutorials",
+          "Experimenting creatively in your own way",
+          "Asking someone or taking guidance",
+          "Observing and learning slowly"
+        ]
+      },
+      {
+        "q": "If you could travel anywhere to learn something new, what kind of place would excite you the most?",
+        "options": [
+          "A place known for innovation and technology",
+          "A place known for culture, ideas, and learning",
+          "A place known for art, creativity, or media",
+          "A place known for business and growth",
+          "A place known for sports or physical training"
+        ]
+      },
+      {
+        "q": "When you are deeply involved in a hobby, what motivates you the most to continue?",
+        "options": [
+          "Improving my skills and understanding",
+          "Learning more and gaining knowledge",
+          "Enjoying creativity and expression",
+          "Seeing results or success",
+          "Enjoying the activity itself"
+        ]
+      },
+      {
+        "q": "If you could turn one of your interests into something bigger, what would you most likely choose?",
+        "options": [
+          "Technology, gaming, or systems",
+          "Teaching, communication, or guiding others",
+          "Art, design, or content creation",
+          "Business, finance, or entrepreneurship",
+          "Fitness, sports, or active engagement"
+        ]
+      },
+      {
+        "q": "You are part of a group project that requires both creativity and digital work. What role do you naturally take?",
+        "options": [
+          "Handling tools, systems, or technical parts",
+          "Communicating and coordinating with the group",
+          "Designing or creating content",
+          "Planning and managing tasks",
+          "Supporting and participating as needed"
+        ]
+      },
+      {
+        "q": "Which statement best describes how you approach hobbies and skill-building?",
+        "options": [
+          "I actively explore and build skills regularly",
+          "I learn when I find something interesting",
+          "I enjoy expressing creativity through hobbies",
+          "I think about using skills for future success",
+          "I engage mainly for fun and relaxation"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "s12",
+    "section_no": "Section 12",
+    "title": "Goal Setting & Execution Toolkit",
+    "subtitle": "",
+    "instructions": "For each situation, select the one option that best reflects what you would most likely do.",
+    "type": "single",
+    "letters": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+    ],
+    "questions": [
+      {
+        "q": "When you think about your future, which of the following feels most naturally exciting or meaningful to you, even if you are not completely sure yet?",
+        "options": [
+          "Building or solving problems and creating something useful or impactful",
+          "Continuously learning, gaining knowledge, and becoming skilled in a field",
+          "Expressing ideas through creativity such as art, content, or storytelling",
+          "Achieving success, recognition, or financial independence",
+          "Helping people, connecting with others, or making a positive difference"
+        ]
+      },
+      {
+        "q": "You decide to improve in something important (for example, marks, fitness, or a skill). How do you usually begin?",
+        "options": [
+          "Break it into clear steps and make a plan",
+          "Start working gradually without a strict plan",
+          "Begin with excitement and motivation",
+          "Work only when needed or reminded",
+          "Do not plan clearly"
+        ]
+      },
+      {
+        "q": "You start working toward a goal but lose interest after a few days. What do you usually do?",
+        "options": [
+          "Remind myself why I started and continue",
+          "Take a short break and restart",
+          "Look for motivation from others",
+          "Wait until I feel motivated again",
+          "Stop working on it"
+        ]
+      },
+      {
+        "q": "You face a difficulty or obstacle while working toward a goal. What is your most natural reaction?",
+        "options": [
+          "Try different ways to solve the problem",
+          "Change my approach and continue",
+          "Take time and come back later",
+          "Feel discouraged and slow down",
+          "Leave it completely"
+        ]
+      },
+      {
+        "q": "When working toward a goal, how do you usually check your progress?",
+        "options": [
+          "I regularly review and track what I have done",
+          "I check my progress sometimes",
+          "I notice progress only when results come",
+          "I rarely check",
+          "I do not track it"
+        ]
+      },
+      {
+        "q": "You achieve a goal that you had set for yourself. What do you usually do next?",
+        "options": [
+          "Reflect on it and set a new goal",
+          "Feel satisfied and move ahead",
+          "Celebrate and take a break",
+          "Move on without thinking much",
+          "Do not think about it further"
+        ]
+      },
+      {
+        "q": "You have multiple goals at the same time (school, hobbies, personal goals). How do you manage them?",
+        "options": [
+          "Prioritize and plan properly",
+          "Focus on the most important ones first",
+          "Try to manage all together",
+          "Work randomly depending on mood",
+          "Feel overwhelmed"
+        ]
+      },
+      {
+        "q": "You need to take an important decision about your future (subjects, activities, etc.). What do you usually do?",
+        "options": [
+          "Think carefully and compare options before deciding",
+          "Take advice and then decide",
+          "Go with what feels right",
+          "Delay the decision",
+          "Avoid deciding"
+        ]
+      },
+      {
+        "q": "You are working on something important but get distracted (phone, friends, etc.). What do you usually do?",
+        "options": [
+          "Control distractions and stay focused",
+          "Try to reduce distractions",
+          "Get distracted but return to work",
+          "Struggle to manage distractions",
+          "Stop working"
+        ]
+      },
+      {
+        "q": "You set a long-term goal (for example, improving over a year). How do you usually approach it?",
+        "options": [
+          "Plan step by step and work consistently",
+          "Work gradually over time",
+          "Focus on short-term efforts",
+          "Think about it occasionally",
+          "Do not plan clearly"
+        ]
+      },
+      {
+        "q": "When people (family, teachers, or others) expect a lot from you, how do you usually respond?",
+        "options": [
+          "Use it as motivation to perform better",
+          "Balance expectations with my own goals",
+          "Feel pressure but continue",
+          "Feel confused or stressed",
+          "Ignore expectations"
+        ]
+      },
+      {
+        "q": "Which statement best describes how you usually work toward your goals?",
+        "options": [
+          "I stay consistent and focused",
+          "I try but sometimes lose consistency",
+          "I start well but lose momentum",
+          "I find it difficult to continue",
+          "I struggle a lot with follow-through"
+        ]
+      }
+    ]
+  }
+];
+
+/* =========================================================================
+   STATE
+   ========================================================================= */
+let OTP = "";
+let answers = {};      // keyed by question text -> answer (string)
+let currentSectionIdx = 0; // index into QUEST_DATA (0..9), -1 = welcome screen
+let student = { name:"", email:"", studentClass:"", school:"", parentName:"", ageGroup:"", contactNumber:"" };
+
+const app = document.getElementById("app");
+
+/* =========================================================================
+   UTIL
+   ========================================================================= */
+function qs(name){
+  const m = new URLSearchParams(window.location.search);
+  return m.get(name) || "";
+}
+function toast(msg, ms=2600){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._tm);
+  t._tm = setTimeout(()=>t.classList.remove("show"), ms);
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function brandbar(){
+  return `<div class="brandbar"><img src="${LOGO_SRC}" alt="Thryve"><div class="word"><b>Thryve Quest</b><span>Discover what drives you</span></div></div>`;
+}
+function sunburstSVG(){
+  return `<svg class="sunburst" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    ${Array.from({length:16}).map((_,i)=>{
+      const a = (i*22.5)*Math.PI/180;
+      const x1=50+18*Math.cos(a), y1=50+18*Math.sin(a);
+      const x2=50+46*Math.cos(a), y2=50+46*Math.sin(a);
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>`;
+    }).join("")}
+  </svg>`;
+}
+
+/* =========================================================================
+   JSONP helper (for add / check / use — small fast actions)
+   ========================================================================= */
+let jsonpCounter = 0;
+function jsonp(params){
+  return new Promise((resolve, reject) => {
+    jsonpCounter += 1;
+    const cbName = "thryveCb_" + Date.now() + "_" + jsonpCounter;
+    const script = document.createElement("script");
+    let finished = false;
+
+    function cleanup(){
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      clearTimeout(timer);
+    }
+    const timer = setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      cleanup();
+      reject(new Error("Request timed out. Please check your connection and try again."));
+    }, CONFIG.JSONP_TIMEOUT_MS);
+
+    window[cbName] = function(data){
+      if (finished) return;
+      finished = true;
+      cleanup();
+      resolve(data);
+    };
+
+    const qsParams = new URLSearchParams({ ...params, callback: cbName });
+    script.src = CONFIG.SCRIPT_URL + "?" + qsParams.toString();
+    script.onerror = function(){
+      if (finished) return;
+      finished = true;
+      cleanup();
+      reject(new Error("Could not reach the server."));
+    };
+    document.body.appendChild(script);
+  });
+}
+
+async function sheetCheck(otp){ return jsonp({ action:"check", otp }); }
+async function sheetUse(otp, name, email){ return jsonp({ action:"use", otp, name, email }); }
+
+async function sheetSubmit(payload){
+  const res = await fetch(CONFIG.SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  });
+  return res.json();
+}
+
+/* =========================================================================
+   RENDER: loading
+   ========================================================================= */
+function renderLoading(msg){
+  app.innerHTML = `
+    ${brandbar()}
+    <div class="screen"><div class="centerpane">
+      <div class="ring"><div class="spinner"></div></div>
+      <p class="lede">${esc(msg || "Checking your access link…")}</p>
+    </div></div>
+  `;
+}
+
+/* =========================================================================
+   RENDER: denied / error
+   ========================================================================= */
+function renderDenied(message){
+  app.innerHTML = `
+    ${brandbar()}
+    <div class="screen"><div class="centerpane">
+      <span class="badge denied">Access denied</span>
+      <h1 class="title">This link can't be used</h1>
+      <p class="lede">${esc(message)}</p>
+      <p class="lede">If you believe this is a mistake, please contact your counsellor for a new link.</p>
+    </div></div>
+  `;
+}
+
+/* =========================================================================
+   RENDER: welcome / details
+   ========================================================================= */
+function renderWelcome(){
+  app.innerHTML = `
+    ${brandbar()}
+    <div class="screen">
+      <div class="centerpane" style="padding-bottom:6px;">
+        <span class="eyebrow">Before you begin</span>
+        <h1 class="title">Welcome to your Quest</h1>
+        <p class="lede">This journey has 10 short stages exploring how you think, what excites you, and where your strengths lie. Answer honestly — there are no right or wrong answers. It takes about 20–25 minutes.</p>
+      </div>
+      <div class="formcard">
+        <label class="field"><span class="lbl">Full Name <em>*</em></span>
+          <input type="text" id="f_name" placeholder="Your full name" autocomplete="name"></label>
+        <label class="field"><span class="lbl">Email Address <em>*</em></span>
+          <input type="email" id="f_email" placeholder="you@example.com" autocomplete="email"></label>
+        <label class="field"><span class="lbl">Contact Number <em>*</em></span>
+          <input type="tel" id="f_contact" placeholder="10-digit mobile number" autocomplete="tel"></label>
+        <label class="field"><span class="lbl">Class / Grade <em>*</em></span>
+          <input type="text" id="f_class" placeholder="e.g. Class 10 - Section B"></label>
+        <label class="field"><span class="lbl">School Name <em>*</em></span>
+          <input type="text" id="f_school" placeholder="Your school's name"></label>
+        <label class="field"><span class="lbl">Parent / Guardian Name <em>*</em></span>
+          <input type="text" id="f_parent" placeholder="Parent or guardian's name"></label>
+        <label class="field"><span class="lbl">Age Group <em>*</em></span>
+          <select id="f_age">
+            <option value="">Select age group</option>
+            <option value="Under 13">Under 13</option>
+            <option value="13–15">13–15</option>
+            <option value="16–18">16–18</option>
+            <option value="Above 18">Above 18</option>
+          </select></label>
+        <div class="btn-row" style="justify-content:flex-end;">
+          <button class="btn btn-primary" id="beginBtn">Begin My Quest →</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById("beginBtn").addEventListener("click", onBeginClick);
+}
+
+async function onBeginClick(){
+  const name = document.getElementById("f_name").value.trim();
+  const email = document.getElementById("f_email").value.trim();
+  const contactNumber = document.getElementById("f_contact").value.trim();
+  const studentClass = document.getElementById("f_class").value.trim();
+  const school = document.getElementById("f_school").value.trim();
+  const parentName = document.getElementById("f_parent").value.trim();
+  const ageGroup = document.getElementById("f_age").value.trim();
+
+  const fields = [
+    ["f_name", name], ["f_email", email], ["f_contact", contactNumber],
+    ["f_class", studentClass], ["f_school", school], ["f_parent", parentName], ["f_age", ageGroup]
+  ];
+  let ok = true;
+  fields.forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!val){ el.classList.add("error"); ok = false; } else { el.classList.remove("error"); }
+  });
+  if (!ok){ toast("Please fill in every field to continue."); return; }
+  if (!/^\S+@\S+\.\S+$/.test(email)){ document.getElementById("f_email").classList.add("error"); toast("Please enter a valid email address."); return; }
+
+  const btn = document.getElementById("beginBtn");
+  btn.disabled = true; btn.textContent = "Starting…";
+
+  try{
+    const res = await sheetUse(OTP, name, email);
+    if (res.status !== "ok"){
+      renderDenied(res.msg || "This access link is no longer valid.");
+      return;
+    }
+    student = { name, email, studentClass, school, parentName, ageGroup, contactNumber };
+    currentSectionIdx = 0;
+    renderSection();
+  }catch(e){
+    btn.disabled = false; btn.textContent = "Begin My Quest →";
+    toast(e.message || "Something went wrong. Please try again.");
+  }
+}
+
+/* =========================================================================
+   RENDER: a quiz section
+   ========================================================================= */
+function totalQuestions(){
+  return QUEST_DATA.reduce((sum,s)=>sum+s.questions.length,0);
+}
+function answeredCount(){
+  let n=0;
+  QUEST_DATA.forEach(sec=>{
+    sec.questions.forEach(q=>{
+      const key = q.q;
+      const v = answers[key];
+      if (sec.type==="multi"){ if (v && v.length) n++; }
+      else { if (v && String(v).trim()) n++; }
+    });
+  });
+  return n;
+}
+
+function renderTrail(){
+  const nodes = QUEST_DATA.map((s,i)=>{
+    let cls = "node";
+    if (i < currentSectionIdx) cls += " done";
+    else if (i === currentSectionIdx) cls += " current";
+    return `<div class="${cls}"></div>`;
+  }).join("");
+  const pct = Math.round((answeredCount()/totalQuestions())*100);
+  return `
+    <div class="trail-wrap">
+      <div class="trail">${nodes}</div>
+      <div class="progress-meta">
+        <span class="stage">Stage ${currentSectionIdx+1} of ${QUEST_DATA.length}</span>
+        <span class="pct">${pct}% answered</span>
+      </div>
+    </div>
+  `;
+}
+
+function optionRow(letter, text, selected, multi, qIndex, optIndex){
+  return `
+    <div class="opt ${multi?'checkbox':''} ${selected?'selected':''}" data-qidx="${qIndex}" data-oidx="${optIndex}">
+      <div class="mark"><div class="dot"></div></div>
+      <div class="otext"><span class="oletter">${letter}</span>${esc(text)}</div>
+    </div>
+  `;
+}
+
+function renderSection(){
+  const sec = QUEST_DATA[currentSectionIdx];
+  let bodyHtml = "";
+
+  if (sec.type === "text"){
+    // Word association — grouped list of single text inputs
+    let lastGroup = null;
+    bodyHtml += `<div class="qblock" id="wat-block">`;
+    sec.questions.forEach((item, qi) => {
+      if (item.group !== lastGroup){
+        bodyHtml += `<div class="wat-group-label">${esc(item.group)}</div>`;
+        lastGroup = item.group;
+      }
+      const val = answers[item.q] || "";
+      bodyHtml += `
+        <div class="wat-row">
+          <div class="wat-word">${esc(item.q)}</div>
+          <input type="text" data-watidx="${qi}" placeholder="first word that comes to mind" value="${esc(val)}">
+        </div>
+      `;
+    });
+    bodyHtml += `</div>`;
+  } else {
+    sec.questions.forEach((q, qi) => {
+      const isMulti = sec.type === "multi";
+      const selectedVal = answers[q.q];
+      const selectedSet = isMulti ? new Set(selectedVal || []) : null;
+      let optsHtml = "";
+      q.options.forEach((optText, oi) => {
+        const letter = sec.letters[oi];
+        const isSelected = isMulti ? selectedSet.has(letter) : (selectedVal === letter);
+        optsHtml += optionRow(letter, optText, isSelected, isMulti, qi, oi);
+      });
+      bodyHtml += `
+        <div class="qblock" data-qblock="${qi}">
+          <div class="qhead">
+            <div class="qnum">${String(qi+1).padStart(2,'0')}</div>
+            <div>
+              <div class="qtext">${esc(q.q)}</div>
+              ${isMulti ? '<div class="qhint">Select up to 2 options</div>' : ''}
+            </div>
+          </div>
+          ${optsHtml}
+        </div>
+      `;
+    });
+  }
+
+  const isLast = currentSectionIdx === QUEST_DATA.length - 1;
+
+  app.innerHTML = `
+    ${brandbar()}
+    <div class="screen" style="justify-content:flex-start;">
+      ${renderTrail()}
+      <div class="section-head">
+        ${sunburstSVG()}
+        <div class="sec-no">${esc(sec.section_no)}</div>
+        <h2>${esc(sec.title)}</h2>
+        ${sec.subtitle ? `<div class="sub">${esc(sec.subtitle)}</div>` : ""}
+        ${sec.instructions ? `<div class="instructions">${esc(sec.instructions)}</div>` : ""}
+      </div>
+      <div id="qarea">${bodyHtml}</div>
+      <div class="btn-row">
+        ${currentSectionIdx > 0 ? `<button class="btn btn-ghost" id="backBtn">← Back</button>` : `<span></span>`}
+        <button class="btn btn-primary" id="nextBtn">${isLast ? "Review & Submit →" : "Next Stage →"}</button>
+      </div>
+    </div>
+  `;
+
+  attachSectionHandlers(sec);
+}
+
+function attachSectionHandlers(sec){
+  if (sec.type === "text"){
+    document.querySelectorAll('#wat-block input[data-watidx]').forEach(inp=>{
+      inp.addEventListener("input", (e)=>{
+        const idx = parseInt(e.target.getAttribute("data-watidx"),10);
+        const item = sec.questions[idx];
+        answers[item.q] = e.target.value;
+      });
+    });
+  } else {
+    document.querySelectorAll('.opt').forEach(optEl=>{
+      optEl.addEventListener("click", ()=>{
+        const qi = parseInt(optEl.getAttribute("data-qidx"),10);
+        const oi = parseInt(optEl.getAttribute("data-oidx"),10);
+        const q = sec.questions[qi];
+        const letter = sec.letters[oi];
+        const qblock = optEl.closest(".qblock");
+
+        if (sec.type === "multi"){
+          let cur = new Set(answers[q.q] || []);
+          if (cur.has(letter)){
+            cur.delete(letter);
+          } else {
+            if (cur.size >= 2){
+              toast("You can select up to 2 options for this question.");
+              return;
+            }
+            cur.add(letter);
+          }
+          answers[q.q] = Array.from(cur);
+        } else {
+          answers[q.q] = letter;
+        }
+        qblock.classList.remove("unanswered-flag");
+        // re-render just this qblock's options
+        const optsContainer = qblock.querySelectorAll(".opt");
+        const selSet = sec.type === "multi" ? new Set(answers[q.q]) : null;
+        optsContainer.forEach((el,idx2)=>{
+          const l2 = sec.letters[idx2];
+          const isSel = sec.type === "multi" ? selSet.has(l2) : (answers[q.q] === l2);
+          el.classList.toggle("selected", isSel);
+        });
+      });
+    });
+  }
+
+  document.getElementById("nextBtn").addEventListener("click", onNextClick);
+  const backBtn = document.getElementById("backBtn");
+  if (backBtn) backBtn.addEventListener("click", ()=>{ currentSectionIdx--; renderSection(); window.scrollTo(0,0); });
+}
+
+function onNextClick(){
+  const sec = QUEST_DATA[currentSectionIdx];
+  let firstUnanswered = null;
+
+  if (sec.type === "text"){
+    sec.questions.forEach((item)=>{
+      if (!answers[item.q] || !String(answers[item.q]).trim()){
+        if (firstUnanswered === null) firstUnanswered = item;
+      }
+    });
+  } else {
+    sec.questions.forEach((q, qi)=>{
+      const v = answers[q.q];
+      const answeredOk = sec.type === "multi" ? (v && v.length > 0) : !!v;
+      if (!answeredOk){
+        if (firstUnanswered === null) firstUnanswered = q;
+        const block = document.querySelector(`.qblock[data-qblock="${qi}"]`);
+        if (block) block.classList.add("unanswered-flag");
+      }
+    });
+  }
+
+  if (firstUnanswered){
+    toast("Please answer every question before continuing.");
+    const flagged = document.querySelector(".unanswered-flag") || document.getElementById("wat-block");
+    if (flagged) flagged.scrollIntoView({behavior:"smooth", block:"center"});
+    return;
+  }
+
+  if (currentSectionIdx === QUEST_DATA.length - 1){
+    submitQuest();
+  } else {
+    currentSectionIdx++;
+    renderSection();
+    window.scrollTo(0,0);
+  }
+}
+
+/* =========================================================================
+   SUBMIT
+   ========================================================================= */
+function buildFormDataPayload(){
+  const out = {};
+  QUEST_DATA.forEach((sec, si)=>{
+    const headerKey = "__SECTION_HEADER__" + si;
+    out[headerKey] = sec.section_no + ": " + sec.title + (sec.subtitle ? " — " + sec.subtitle : "");
+    sec.questions.forEach((q)=>{
+      const v = answers[q.q];
+      if (sec.type === "multi"){
+        out[q.q] = (v || []).join(", ");
+      } else {
+        out[q.q] = v || "";
+      }
+    });
+  });
+  return out;
+}
+
+function renderSubmitting(){
+  app.innerHTML = `
+    ${brandbar()}
+    <div class="screen"><div class="centerpane">
+      <div class="ring"><div class="spinner"></div></div>
+      <h1 class="title">Submitting your answers…</h1>
+      <p class="lede">Please don't close this window. This may take a few seconds.</p>
+    </div></div>
+  `;
+}
+
+function renderThankYou(){
+  app.innerHTML = `
+    ${brandbar()}
+    <div class="screen"><div class="centerpane">
+      <span class="badge ok">Quest complete</span>
+      <h1 class="title">Thank you, ${esc(student.name.split(" ")[0] || "explorer")}!</h1>
+      <p class="lede">Your responses have been recorded. Your counsellor will be in touch with your personalised insights soon.</p>
+    </div></div>
+  `;
+}
+
+function renderSubmitError(message, payload){
+  app.innerHTML = `
+    ${brandbar()}
+    <div class="screen"><div class="centerpane">
+      <span class="badge denied">Submission failed</span>
+      <h1 class="title">Something went wrong</h1>
+      <p class="lede">${esc(message)}</p>
+      <button class="btn btn-primary" id="retryBtn">Try Again</button>
+    </div></div>
+  `;
+  document.getElementById("retryBtn").addEventListener("click", ()=> doSubmitRequest(payload));
+}
+
+async function doSubmitRequest(payload){
+  renderSubmitting();
+  try{
+    const res = await sheetSubmit(payload);
+    if (res.status === "ok"){
+      renderThankYou();
+    } else {
+      renderSubmitError(res.msg || "The server could not save your answers. Please try again.", payload);
+    }
+  }catch(e){
+    renderSubmitError(e.message || "We couldn't reach the server. Please check your connection and try again.", payload);
+  }
+}
+
+function submitQuest(){
+  const formData = buildFormDataPayload();
+  const payload = {
+    action: "submit",
+    otp: OTP,
+    name: student.name,
+    email: student.email,
+    studentClass: student.studentClass,
+    school: student.school,
+    parentName: student.parentName,
+    ageGroup: student.ageGroup,
+    contactNumber: student.contactNumber,
+    formData: JSON.stringify(formData)
+  };
+  doSubmitRequest(payload);
+}
+
+/* =========================================================================
+   BOOT
+   ========================================================================= */
+async function boot(){
+  OTP = qs("otp").trim();
+  if (!OTP){
+    renderDenied("No access code was found in this link. Please use the exact link your counsellor shared with you.");
+    return;
+  }
+  renderLoading("Verifying your access link…");
+  try{
+    const res = await sheetCheck(OTP);
+    if (res.status === "ok"){
+      renderWelcome();
+    } else {
+      renderDenied(res.msg || "This access link is invalid or has already been used.");
+    }
+  }catch(e){
+    renderDenied(e.message || "We couldn't verify your access link. Please check your connection and try again.");
+  }
+}
+boot();
+</script>
+</body>
+</html>
