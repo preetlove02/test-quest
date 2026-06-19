@@ -1990,6 +1990,13 @@ function onNextClick(){
 /* =========================================================================
    SUBMIT
    ========================================================================= */
+function formatAnswer(sec, q, letter){
+  if (!letter) return "";
+  const idx = sec.letters ? sec.letters.indexOf(letter) : -1;
+  const text = (idx >= 0 && q.options && q.options[idx] !== undefined) ? q.options[idx] : "";
+  return text ? (letter + ". " + text) : letter;
+}
+
 function buildFormDataPayload(){
   const out = {};
   QUEST_DATA.forEach((sec, si)=>{
@@ -1997,10 +2004,13 @@ function buildFormDataPayload(){
     out[headerKey] = sec.section_no + ": " + sec.title + (sec.subtitle ? " — " + sec.subtitle : "");
     sec.questions.forEach((q)=>{
       const v = answers[q.q];
-      if (sec.type === "multi"){
-        out[q.q] = (v || []).join(", ");
-      } else {
+      if (sec.type === "text"){
         out[q.q] = v || "";
+      } else if (sec.type === "multi"){
+        const arr = (v || []).map(letter => formatAnswer(sec, q, letter));
+        out[q.q] = arr.join("  |  ");
+      } else {
+        out[q.q] = v ? formatAnswer(sec, q, v) : "";
       }
     });
   });
